@@ -3,7 +3,7 @@ import express from 'express';
 const PORT = process.env.PORT || 3000;
 const GHL_API_TOKEN = process.env.GHL_API_TOKEN || '';
 const GHL_LOCATION_ID = process.env.GHL_LOCATION_ID || '';
-const GHL_API_BASE = (process.env.GHL_API_BASE || 'https://rest.gohighlevel.com/v1').replace(/\/+$/, '');
+const GHL_API_BASE = (process.env.GHL_API_BASE || 'https://services.leadconnectorhq.com').replace(/\/+$/, '');
 
 const GHL_HEADERS = {
   'Content-Type': 'application/json',
@@ -18,6 +18,13 @@ const GHL_STAGE_AUDIT_DELIVERED = process.env.GHL_STAGE_AUDIT_DELIVERED || '';
 const GHL_STAGE_PILOT_PROPOSED = process.env.GHL_STAGE_PILOT_PROPOSED || '';
 const GHL_STAGE_BUILD_ACTIVE = process.env.GHL_STAGE_BUILD_ACTIVE || '';
 const GHL_STAGE_PARTNER = process.env.GHL_STAGE_PARTNER || '';
+
+const GHL_CF_BUSINESS_TYPE = process.env.GHL_CF_BUSINESS_TYPE || '';
+const GHL_CF_COMPANY_SIZE = process.env.GHL_CF_COMPANY_SIZE || '';
+const GHL_CF_WASTE_SIGNALS = process.env.GHL_CF_WASTE_SIGNALS || '';
+const GHL_CF_ESTIMATED_WASTE = process.env.GHL_CF_ESTIMATED_WASTE || '';
+const GHL_CF_AUDIT_DATE = process.env.GHL_CF_AUDIT_DATE || '';
+const GHL_CF_AUDIT_NOTES_URL = process.env.GHL_CF_AUDIT_NOTES_URL || '';
 
 function warnMissingEnv() {
   if (!GHL_API_TOKEN) console.error('MISSING ENV: GHL_API_TOKEN');
@@ -63,12 +70,12 @@ function validateLeadPayload(body) {
 
 function mapCustomFields(body) {
   const fields = [];
-  if (body.business_type) fields.push({ key: 'business_type', value: body.business_type });
-  if (body.waste_signals) fields.push({ key: 'waste_signals', value: Array.isArray(body.waste_signals) ? body.waste_signals.join(', ') : body.waste_signals });
-  if (body.estimated_waste_usd != null) fields.push({ key: 'estimated_waste_$_month', value: String(body.estimated_waste_usd) });
-  if (body.company_size) fields.push({ key: 'company_size', value: body.company_size });
-  if (body.audit_date) fields.push({ key: 'audit_date', value: body.audit_date });
-  if (body.audit_notes_url) fields.push({ key: 'audit_notes_url', value: body.audit_notes_url });
+  if (body.business_type && GHL_CF_BUSINESS_TYPE) fields.push({ key: GHL_CF_BUSINESS_TYPE, value: body.business_type });
+  if (body.waste_signals && GHL_CF_WASTE_SIGNALS) fields.push({ key: GHL_CF_WASTE_SIGNALS, value: Array.isArray(body.waste_signals) ? body.waste_signals.join(', ') : body.waste_signals });
+  if (body.estimated_waste_usd != null && GHL_CF_ESTIMATED_WASTE) fields.push({ key: GHL_CF_ESTIMATED_WASTE, value: String(body.estimated_waste_usd) });
+  if (body.company_size && GHL_CF_COMPANY_SIZE) fields.push({ key: GHL_CF_COMPANY_SIZE, value: body.company_size });
+  if (body.audit_date && GHL_CF_AUDIT_DATE) fields.push({ key: GHL_CF_AUDIT_DATE, value: body.audit_date });
+  if (body.audit_notes_url && GHL_CF_AUDIT_NOTES_URL) fields.push({ key: GHL_CF_AUDIT_NOTES_URL, value: body.audit_notes_url });
   return fields;
 }
 
@@ -85,6 +92,7 @@ app.get('/', (_req, res) => {
       location_id_set: !!GHL_LOCATION_ID,
       pipeline_id_set: !!GHL_PIPELINE_ID,
       stage_lead_set: !!GHL_STAGE_LEAD,
+      cf_business_type_set: !!GHL_CF_BUSINESS_TYPE,
       ghl_api_base: GHL_API_BASE,
     },
   });
