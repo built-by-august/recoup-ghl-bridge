@@ -70,12 +70,12 @@ function validateLeadPayload(body) {
 
 function mapCustomFields(body) {
   const fields = [];
-  if (body.business_type && GHL_CF_BUSINESS_TYPE) fields.push({ key: GHL_CF_BUSINESS_TYPE, value: body.business_type });
-  if (body.waste_signals && GHL_CF_WASTE_SIGNALS) fields.push({ key: GHL_CF_WASTE_SIGNALS, value: Array.isArray(body.waste_signals) ? body.waste_signals.join(', ') : body.waste_signals });
-  if (body.estimated_waste_usd != null && GHL_CF_ESTIMATED_WASTE) fields.push({ key: GHL_CF_ESTIMATED_WASTE, value: String(body.estimated_waste_usd) });
-  if (body.company_size && GHL_CF_COMPANY_SIZE) fields.push({ key: GHL_CF_COMPANY_SIZE, value: body.company_size });
-  if (body.audit_date && GHL_CF_AUDIT_DATE) fields.push({ key: GHL_CF_AUDIT_DATE, value: body.audit_date });
-  if (body.audit_notes_url && GHL_CF_AUDIT_NOTES_URL) fields.push({ key: GHL_CF_AUDIT_NOTES_URL, value: body.audit_notes_url });
+  if (body.business_type && GHL_CF_BUSINESS_TYPE) fields.push({ key: GHL_CF_BUSINESS_TYPE, fieldValue: body.business_type });
+  if (body.waste_signals && GHL_CF_WASTE_SIGNALS) fields.push({ key: GHL_CF_WASTE_SIGNALS, fieldValue: Array.isArray(body.waste_signals) ? body.waste_signals.join(', ') : body.waste_signals });
+  if (body.estimated_waste_usd != null && GHL_CF_ESTIMATED_WASTE) fields.push({ key: GHL_CF_ESTIMATED_WASTE, fieldValue: String(body.estimated_waste_usd) });
+  if (body.company_size && GHL_CF_COMPANY_SIZE) fields.push({ key: GHL_CF_COMPANY_SIZE, fieldValue: body.company_size });
+  if (body.audit_date && GHL_CF_AUDIT_DATE) fields.push({ key: GHL_CF_AUDIT_DATE, fieldValue: body.audit_date });
+  if (body.audit_notes_url && GHL_CF_AUDIT_NOTES_URL) fields.push({ key: GHL_CF_AUDIT_NOTES_URL, fieldValue: body.audit_notes_url });
   return fields;
 }
 
@@ -140,11 +140,7 @@ app.post('/webhook/lead', async (req, res) => {
 
     const customFields = mapCustomFields(req.body);
     if (customFields.length > 0) {
-      await Promise.all(
-        customFields.map((field) =>
-          ghlPost(`/contacts/${contactId}/customFields`, field)
-        )
-      );
+      await ghlPut(`/contacts/${contactId}`, { customFields });
     }
 
     const opportunityPayload = {
